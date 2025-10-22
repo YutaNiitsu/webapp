@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>画像分類</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>画像分類</h1>
+
+    <label for="imageInput">画像を選択:</label>
+    <input type="file" id="imageInput" accept="image/*">
+
+    <div class="preview">
+      <p>プレビュー:</p>
+      <img id="previewImage" src="" alt="選択された画像" />
+    </div>
+
+    <button id="analyzeButton">アップロードと分析</button>
+
+    <div class="result">
+      <p>結果</p>
+      <p id="classification">分類: 未分析</p>
+      <p id="confidence">信頼度: -%</p>
+    </div>
+  </div>
+
+  <script>
+    const imageInput = document.getElementById('imageInput');
+    const previewImage = document.getElementById('previewImage');
+    const analyzeButton = document.getElementById('analyzeButton');
+
+    imageInput.addEventListener('change', function () {
+      const file = this.files[0];
+      if (file) {
+        previewImage.src = URL.createObjectURL(file);
+      }
+    });
+
+    analyzeButton.addEventListener('click', function () {
+      const file = imageInput.files[0];
+      if (!file) {
+        alert("画像を選択してください");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      fetch("/upload/", {
+        method: "POST",
+        body: formData
+      })
+        .then(res => {
+          if (!res.ok) throw new Error("アップロード失敗");
+          return res.json();
+        })
+        .then(data => {
+          const filename = data.filename;
+          return fetch(`/recognize/${filename}`);
+        })
+        .then(res => {
+          if (!res.ok) throw new Error("認識失敗");
+          return res.json();
+        })
+        .then(data => {
+          document.getElementById("classification").textContent = `分類: ${data.predicted_class}`;
+          document.getElementById("confidence").textContent = `信頼度: ${data.confidence}%`; 
+        })
+        .catch(err => {
+          console.error(err);
+          alert("処理中にエラーが発生しました");
+        });
+    });
+  </script>
+</body>
+</html>
