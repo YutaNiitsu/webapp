@@ -2,7 +2,7 @@ import torch
 import torchvision.transforms as transforms
 import cv2
 from image_cnnmodel import CNNModel
-from load_config import load_config
+from config_loader import config_labels
 
 class ImagePredict:
     def __init__(self):
@@ -10,8 +10,7 @@ class ImagePredict:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print("Using device:", self.device)
 
-        config = load_config('labels.yaml')
-        self.label_map = config['label_map']
+        self.label_map = config_labels['label_map']
 
     def readModel(self, path):
         # モデル読み込み

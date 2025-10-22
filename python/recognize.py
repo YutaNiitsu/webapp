@@ -5,7 +5,7 @@ import torchvision.transforms as transforms
 from PIL import Image
 import os
 from image_predict import ImagePredict
-from load_config import load_config
+from config_loader import config_learn
 
 app = FastAPI()
 
@@ -19,9 +19,7 @@ transform = transforms.Compose([
 
 @app.get("/recognize/{filename}")
 def recognize_image(filename: str):
-    # 設定ファイル読み込み
-    config = load_config(config_path)
-    model_path = "image_model.pth"
+    model_path = config_learn['save_model_path']
     image_path = os.path.join("uploads", filename)
     if not os.path.exists(image_path):
         return JSONResponse(content={"error": "File not found"}, status_code=404)
