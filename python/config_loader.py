@@ -19,5 +19,5 @@ def load_config(path):
 
     return config
 
-config_learn = load_config("C:/Users/yniit/Documents/aitraining/config/learn.yaml")
-config_labels = load_config("C:/Users/yniit/Documents/aitraining/config/labels.yaml")
+config_learn = load_config("/mnt/c/Users/yniit/Documents/aitraining/config/learn.yaml")
+config_labels = load_config("/mnt/c/Users/yniit/Documents/aitraining/config/labels.yaml")
