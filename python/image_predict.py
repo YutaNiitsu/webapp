@@ -10,6 +10,7 @@ class ImagePredict:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print("Using device:", self.device)
 
+        # ラベルマップ読み込み
         self.label_map = config_labels['label_map']
 
     def readModel(self, path):
@@ -29,7 +30,7 @@ class ImagePredict:
         transform = transforms.Compose([
             transforms.ToTensor()
         ])
-        image_tensor = transform(self.image).unsqueeze(0).to(self.device)  # shape: [1, 3, 64, 64]
+        image_tensor = transform(self.image).unsqueeze(0).to(self.device)
 
         # 推論
         with torch.no_grad():
@@ -38,6 +39,7 @@ class ImagePredict:
             answer = torch.argmax(predictions, dim=1).item()
             confidence = predictions[0, answer].item()
         
+        # 辞書のキーと値を反転
         reverse_label_map = {v: k for k, v in self.label_map.items()}
         predicted_class = reverse_label_map[answer]
 
