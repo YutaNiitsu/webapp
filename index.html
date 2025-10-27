@@ -57,14 +57,6 @@
           return res.json();
         })
         .then(data => {
-          const filename = data.filename;
-          return fetch(`/recognize/${filename}`);
-        })
-        .then(res => {
-          if (!res.ok) throw new Error("認識失敗");
-          return res.json();
-        })
-        .then(data => {
           document.getElementById("classification").textContent = `分類: ${data.predicted_class}`;
           document.getElementById("confidence").textContent = `信頼度: ${data.confidence}%`; 
         })

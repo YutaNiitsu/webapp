@@ -18,36 +18,28 @@ app.add_middleware(
 UPLOAD_DIR = Path(__file__).resolve().parent.parent / "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# 分析
-@app.get("/recognize/{filename}")
-def recognize_image(filename: str):
+# アップロードと分析
+@app.post("/upload/")
+async def upload_image(file: UploadFile = File(...)):
     output = config_learn.get('output')
     model_path = os.path.join('/mnt/c/Users/yniit/Documents/aitraining', output.get('save_model_path'))
-    image_path = os.path.join(UPLOAD_DIR, filename)
-    if not os.path.exists(image_path):
-        return JSONResponse(content={"error": "File not found"}, status_code=404)
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
     
     img_pred = ImagePredict()
     img_pred.readModel(model_path)
-    img_pred.readImage(image_path)
+    img_pred.readImage(file_path)
     predicted_class, confidence = img_pred.predict()
 
     # 分析後にファイル削除
     try:
-        os.remove(image_path)
+        os.remove(file_path)
     except Exception as e:
         print(f"[WARN] ファイル削除失敗: {e}")
-    
-    return {
-        "filename": filename,
-        "predicted_class": predicted_class,
-        "confidence": round(confidence * 100, 2)  # パーセンテージ表示
-    }
 
-# アップロード
-@app.post("/upload/")
-async def upload_image(file: UploadFile = File(...)):
-    file_path = os.path.join(UPLOAD_DIR, file.filename)
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    return JSONResponse(content={"filename": file.filename, "status": "uploaded"})
+    return {
+    "filename": file.filename,
+    "predicted_class": predicted_class,
+    "confidence": round(confidence * 100, 2)  # パーセンテージ表示
+    }
